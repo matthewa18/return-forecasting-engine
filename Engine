@@ -1,0 +1,64 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+
+# Read the CSV files
+idio_vol = pd.read_csv("1stidiosyncratic_volatility.csv")
+monthly_returns = pd.read_csv("1stmonthly_returns.csv")
+
+# Merge the two DataFrames on 'Permno' and 'Month"
+merged_df = pd.merge(idio_vol, monthly_returns, on=["PERMNO", "Month"], how="inner")
+print("Columns in merged_df:", merged_df.columns)
+
+print("Columns in merged_df:", merged_df.columns)
+print(merged_df.info())
+
+# Forecast the next month 
+merged_df["RET"] = merged_df["RET_x"]
+merged_df["RET_lead"] = merged_df["RET"].shift(-1)
+merged_df["Idiosyncratic Volatility"] = merged_df["Idiosyncratic Volatility"]
+merged_df = merged_df.dropna(subset=["Idiosyncratic Volatility", "RET_lead"])
+
+X = merged_df[["Idiosyncratic Volatility"]]
+Y = merged_df["RET_lead"]
+
+# Create a Linear Regression Model
+linear_regression= LinearRegression()
+linear_regression.fit(X,Y)
+
+print("Model Coefficients:", linear_regression.coef_)
+
+merged_df["Forecasted_RET"] = linear_regression.predict(X)
+
+# Debugging: Check column names and data
+print("Columns in merged_df:", merged_df.columns)
+print(merged_df.head())
+print(merged_df.isnull().sum())
+
+# Ensure column names are correct
+print(merged_df[["PERMNO", "Month", "Idiosyncratic Volatility", "RET", "Forecasted_RET"]])
+
+# Save the results to a CSV file
+merged_df.to_csv("forecasted_returns.csv", index=False)
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+ 
+X = merged_df["Idiosyncratic Volatility"].values
+Y = merged_df["RET_lead"].values
+Z = merged_df["Forecasted_RET"].values
+
+fig = plt.figure(figsize=(10,7))
+ax = fig.add_subplot(111, projection='3d')
+
+ax.scatter(X, Y, Z, c="r", marker="o")
+
+ax.set_xlabel("Idiosyncratic Volatility")
+ax.set_ylabel("Actual Return")
+ax.set_zlabel("Forecasted Return")
+
+ax.set_title("3D Return Surface Under Varying Idiosyncratic Risk Levels", fontsize=16)
+plt.show(block=True)
+plt.show()
+
+
