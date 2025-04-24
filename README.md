@@ -1,4 +1,4 @@
-# Return Forecasting Engine
+# Volatility-Based Return Forecasting & Classification Engine
 
 This project is the foundation of a return classification engine designed to analyze how stock-level risk characteristics relate to future returns. The initial implementation models the relationship between idiosyncratic volatility and next-month returns using linear regression. The long-term objective is to expand this into a fully modular engine capable of return classification and signal-based ranking across multiple financial factors.
 
