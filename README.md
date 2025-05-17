@@ -1,6 +1,6 @@
 # Volatility-Based Return Forecasting & Classification Engine
 
-This project implements a modeling pipeline to analyze how stock-level risk characteristics relate to future returns. The current version estimates the relationship between idiosyncratic volatility and next-month returns using linear regression, and applies supervised classification to segment return outcomes. The long-term goal is to develop a flexible return engine that supports signal-based ranking and evaluation across multiple financial factors.
+This project implements a modeling pipeline to analyze how stock-level risk characteristics relate to future returns. The current version estimates the relationship between idiosyncratic volatility and next-month returns using linear regression, and applies supervised classification to segment return outcomes. The long-term goal is to develop a return engine that supports signal-based ranking and evaluation across multiple financial factors.
 
 ## Contents
 
