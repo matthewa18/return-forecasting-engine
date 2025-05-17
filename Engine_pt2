@@ -1,0 +1,66 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+# -------------------------
+# LOAD & MERGE DATA
+# -------------------------
+idio_vol = pd.read_csv("1stidiosyncratic_volatility.csv")
+monthly_returns = pd.read_csv("1stmonthly_returns.csv")
+
+merged_df = pd.merge(idio_vol, monthly_returns, on=["PERMNO", "Month"], how="inner")
+print("Columns in merged_df:", merged_df.columns)
+print(merged_df.info())
+
+# -------------------------
+# FORECAST NEXT-MONTH RETURN
+# -------------------------
+merged_df["RET"] = merged_df["RET_x"]
+merged_df["RET_lead"] = merged_df.groupby("PERMNO")["RET"].shift(-1)
+merged_df = merged_df.dropna(subset=["Idiosyncratic Volatility", "RET_lead"])
+
+X_reg = merged_df[["Idiosyncratic Volatility"]]
+y_reg = merged_df["RET_lead"]
+reg_model = LinearRegression()
+reg_model.fit(X_reg, y_reg)
+
+print("Model Coefficients:", reg_model.coef_)
+merged_df["Forecasted_RET"] = reg_model.predict(X_reg)
+
+# -------------------------
+# DEFINE RETURN CLASS
+# -------------------------
+def Return_Class(df, ret_lead_col):
+    q30 = df[ret_lead_col].quantile(0.3)
+    q70 = df[ret_lead_col].quantile(0.7)
+    print(f"30th Percentile: {q30}, 70th Percentile: {q70}")
+    df["Return_Class"] = 0
+    df.loc[df[ret_lead_col] < q30, "Return_Class"] = -1
+    df.loc[df[ret_lead_col] > q70, "Return_Class"] = 1
+    return df
+
+merged_df = Return_Class(merged_df, "RET_lead")
+
+# -------------------------
+# MACHINE LEARNING MODEL
+# -------------------------
+merged_df = merged_df.dropna(subset=["Return_Class", "Forecasted_RET", "Idiosyncratic Volatility"])
+
+X = merged_df[["Idiosyncratic Volatility", "Forecasted_RET"]]
+y = merged_df["Return_Class"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, cmap="Blues")
+plt.title("Confusion Matrix")
+plt.show()
