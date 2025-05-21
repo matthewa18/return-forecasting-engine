@@ -1,5 +1,7 @@
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, ConfusionMatrixDisplay
@@ -22,19 +24,6 @@ merged_df["RET"] = merged_df["RET_x"]
 merged_df["RET_lead"] = merged_df.groupby("PERMNO")["RET"].shift(-1)
 merged_df = merged_df.dropna(subset=["Idiosyncratic Volatility", "RET_lead"])
 
-# Sort for rolling momentum
-merged_df = merged_df.sort_values(by=["PERMNO", "Month"])
-
-#Create momentum for last 12 months excliding last month
-merged_df["Momentum"] = merged_df.groupby("PERMNO")["RET"].transform(
-lambda x: x.shift(1).rolling(window=12).sum()
-)
-#Add a lag of 1 months to the momentum
-merged_df["LAG_2"] = merged_df.groupby("PERMNO")["RET"].shift(2)
-
-# drop Nan rows
-merged_df = merged_df.dropna(subset=["Momentum", "LAG_2"])
-
 X_reg = merged_df[["Idiosyncratic Volatility"]]
 y_reg = merged_df["RET_lead"]
 reg_model = LinearRegression()
@@ -43,12 +32,17 @@ reg_model.fit(X_reg, y_reg)
 print("Model Coefficients:", reg_model.coef_)
 merged_df["Forecasted_RET"] = reg_model.predict(X_reg)
 
+# Add 2-month lag of returns
+merged_df["LAG_2"] = merged_df.groupby("PERMNO")["RET"].shift(2)
+
+
 # -------------------------
 # DEFINE RETURN CLASS
 # -------------------------
 def Return_Class(df, ret_lead_col):
     q50 = df[ret_lead_col].quantile(0.5)
     print(f"50th Percentile: {q50}")
+    df["Return_Class"] = 0
     df.loc[df[ret_lead_col] < q50, "Return_Class"] = 0
     df.loc[df[ret_lead_col] > q50, "Return_Class"] = 1
     return df
@@ -58,24 +52,15 @@ merged_df = Return_Class(merged_df, "RET_lead")
 # -------------------------
 # MACHINE LEARNING MODEL
 # -------------------------
-merged_df = merged_df.dropna(subset=["Return_Class", "Momentum", "Idiosyncratic Volatility", "LAG_2"])
+merged_df = merged_df.dropna(subset=["Idiosyncratic Volatility", "Return_Class", "LAG_2"])
 
-X = merged_df[["Idiosyncratic Volatility", "Momentum", "LAG_2"]]
+X = merged_df[["Idiosyncratic Volatility", "LAG_2"]]
 y = merged_df["Return_Class"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-model = XGBClassifier(
-    n_estimators=100,
-    max_depth=3,
-    learning_rate=0.1,
-    subsample=0.8,
-    colsample_bytree=0.8,
-    use_label_encoder=False,
-    eval_metric="logloss",
-    random_state=42
-)
 
+model = RandomForestClassifier(random_state=42) 
 model.fit(X_train, y_train)
 
 y_pred = model.predict(X_test)
@@ -85,7 +70,3 @@ print(classification_report(y_test, y_pred))
 ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, cmap="Blues")
 plt.title("Confusion Matrix")
 plt.show()
-
-from sklearn.model_selection import cross_val_score
-scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
-print("CV Accuracy:", scores.mean())
