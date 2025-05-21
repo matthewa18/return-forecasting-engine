@@ -1,9 +1,11 @@
+Model Coefficients: [-0.07035784]
+50th Percentile: 0.0
 Classification Report:
               precision    recall  f1-score   support
 
-         0.0       0.50      0.51      0.50       233
-         1.0       0.47      0.47      0.47       222
+           0       0.70      0.79      0.74       470
+           1       0.43      0.31      0.36       237
 
-    accuracy                           0.49       455
-   macro avg       0.49      0.49      0.49       455
-weighted avg       0.49      0.49      0.49       455
+    accuracy                           0.63       707
+   macro avg       0.56      0.55      0.55       707
+weighted avg       0.61      0.63      0.61       707
