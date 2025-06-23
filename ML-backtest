@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+import matplotlib.dates as mdates
+
+# --- Load data ---
+idio_vol = pd.read_csv("1stidiosyncratic_volatility.csv")
+monthly_returns = pd.read_csv("1stmonthly_returns.csv")
+
+merged_df = pd.merge(idio_vol, monthly_returns, on=["PERMNO", "Month"], how="inner")
+merged_df["Month"] = pd.to_datetime(merged_df["Month"])
+merged_df["RET"] = merged_df["RET_x"]
+merged_df["RET_lead"] = merged_df.groupby("PERMNO")["RET"].shift(-1)
+merged_df["LAG_2"] = merged_df.groupby("PERMNO")["RET"].shift(2)
+
+q50 = merged_df["RET_lead"].quantile(0.5)
+merged_df["Return_Class"] = (merged_df["RET_lead"] > q50).astype(int)
+merged_df = merged_df.dropna(subset=["Idiosyncratic Volatility", "LAG_2", "Return_Class", "RET_lead"])
+
+# --- Train model ---
+X = merged_df[["Idiosyncratic Volatility", "LAG_2"]]
+y = merged_df["Return_Class"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+merged_df["ML_Score"] = model.predict_proba(X)[:, 1]
+
+# --- Backtest ML Strategy ---
+returns = []
+for month in sorted(merged_df["Month"].unique()):
+    data = merged_df[merged_df["Month"] == month].copy()
+    if data.empty:
+        continue
+
+    data = data.sort_values("ML_Score", ascending=False)
+    data["Rank"] = data["ML_Score"].rank(ascending=False)
+
+    top = data[data["Rank"] <= data["Rank"].quantile(0.2)]
+    bottom = data[data["Rank"] >= data["Rank"].quantile(0.8)]
+
+    strat_return = top["RET_lead"].mean() - bottom["RET_lead"].mean()
+    market_return = data["RET_lead"].mean()
+
+    returns.append({"Month": month, "StrategyReturn": strat_return, "MarketReturn": market_return})
+
+bt_ml = pd.DataFrame(returns)
+bt_ml = bt_ml[bt_ml["Month"] >= pd.to_datetime("1989-01-01")]
+bt_ml["Cumulative_Strategy"] = (1 + bt_ml["StrategyReturn"]).cumprod()
+bt_ml["Cumulative_Market"] = (1 + bt_ml["MarketReturn"]).cumprod()
+
+# --- Plot ---
+plt.figure(figsize=(12, 6))
+plt.plot(bt_ml["Month"], bt_ml["Cumulative_Strategy"], label="ML Strategy")
+plt.plot(bt_ml["Month"], bt_ml["Cumulative_Market"], label="Market", linestyle="--")
+plt.title("Cumulative Returns: ML Model vs Market")
+plt.xlabel("Month")
+plt.ylabel("Cumulative Return")
+plt.legend()
+plt.grid(True)
+
+# Set x-axis to 1-year ticks
+ax = plt.gca()
+ax.xaxis.set_major_locator(mdates.YearLocator(1))
+ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+
+plt.tight_layout()
+plt.show()
