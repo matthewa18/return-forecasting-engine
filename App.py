@@ -100,7 +100,7 @@ with tabs[1]:
 
     st.subheader("Classification Report")
     img_report = Image.open("Classification Report Results.png")
-    st.image(img_report, use_column_width=True)
+    st.image(img_report, use_container_width=True)
 
 # ========== FEATURE INSIGHTS ==========
 with tabs[2]:
@@ -152,7 +152,7 @@ with tabs[3]:
 
     try:
         img3d = Image.open("3D Return Surface Under Varying Idiosyncratic Risk Levels.png")
-        st.image(img3d, use_column_width=True)
+        st.image(img3d, use_container_width=True)
     except:
         st.error("Error: 3D Return Surface image not found. Please check file name and location.")
 
