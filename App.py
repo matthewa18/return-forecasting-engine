@@ -209,4 +209,11 @@ with tabs[5]:
     **Technologies**  
     Python, Streamlit, Scikit-learn, Plotly, Matplotlib
     """)
+# ========== FOOTER ==========
+st.markdown("""
+<hr style='margin-top: 3rem;'>
+<p style='text-align:center; font-size:14px;'>
+    Built by Matthew Aldridge · Honors Finance & Mathematics @ ASU 
+</p>
+""", unsafe_allow_html=True)
 
