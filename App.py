@@ -68,13 +68,13 @@ with tabs[0]:
     with col1:
         st.subheader("ML Strategy vs Market")
         img1 = Image.open("ML-backtestvisual.png")
-        st.image(img1, use_column_width=True)
+        st.image(img1, use_container_width=True)
         st.metric(label="Sharpe Ratio (ML Strategy)", value="2.45")
 
     with col2:
         st.subheader("Volatility-Only Strategy vs Market")
         img2 = Image.open("Volatilityonly-backtestvisual.png")
-        st.image(img2, use_column_width=True)
+        st.image(img2, use_container_width=True)
         st.metric(label="Sharpe Ratio (Volatility Strategy)", value="0.36")
 
 # ========== MODEL PERFORMANCE ==========
