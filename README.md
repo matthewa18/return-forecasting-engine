@@ -1,6 +1,5 @@
 # ML-Based Equity Return Classifier
-By: Matthew Aldridge
-Honors Finance & Mathematics @ ASU
+By: Matthew Aldridge | Honors Finance & Mathematics @ ASU
 
 This project builds a model to classify the directional performance of individual stocks on a one-month forward horizon. It uses idiosyncratic volatility and lagged returns as predictors. The process begins with a regression analysis to estimate the relationship between volatility and future return, followed by a binary classifier that labels stocks as “buy” or “don’t buy” based on relative forward performance.
 
