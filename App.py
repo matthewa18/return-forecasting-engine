@@ -35,7 +35,7 @@ st.markdown("""
 pio.templates.default = "plotly_white"
 
 # --- HEADER ---
-st.title("Machine Learning-Based Equity Return Classifier")
+st.title("ML-Based Equity Return Classifier")
 st.markdown("""
 This application forecasts equity returns using a supervised learning model based on idiosyncratic volatility and historical returns.
 A simulated trading strategy is backtested to compare performance against the market.
