@@ -213,7 +213,7 @@ with tabs[5]:
 st.markdown("""
 <hr style='margin-top: 3rem;'>
 <p style='text-align:center; font-size:14px;'>
-    Built by Matthew Aldridge · Honors Finance & Mathematics @ ASU 
+    Built by Matthew Aldridge · Honors Mathematics & Finance @ ASU 
 </p>
 """, unsafe_allow_html=True)
 
