@@ -3,7 +3,7 @@ By: Matthew Aldridge | Honors Mathematics & Finance @ ASU
 
 This project builds a model to classify the directional performance of individual stocks on a one-month forward horizon. It uses idiosyncratic volatility and lagged returns as predictors. The process begins with a regression analysis to estimate the relationship between volatility and future return, followed by a binary classifier that labels stocks as “buy” or “don’t buy” based on relative forward performance.
 
-The classifier achieves 61% accuracy on a balanced dataset (50/50 class distribution), reflecting an 11% lift over baseline. Model output is used to construct a long-short equity strategy, which is evaluated using Sharpe ratio and cumulative return.
+The classifier achieves 63% accuracy on a balanced dataset (50/50 class distribution), reflecting an 13% lift over baseline. Model output is used to construct a long-short equity strategy, which is evaluated using Sharpe ratio and cumulative return.
 
 **Live App:** [Streamlit Deployment](https://matthewa18-return-forecasting-engine-app-v7agn0.streamlit.app/)
 
