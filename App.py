@@ -203,7 +203,7 @@ with tabs[5]:
     **Results**  
     - ML strategy outperformed baseline in cumulative return  
     - Sharpe Ratio: 2.45  
-    - Classification accuracy: 61%  
+    - Classification accuracy: 63%  
     - Volatility shown as primary predictive signal
 
     **Technologies**  
